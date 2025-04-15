@@ -38,6 +38,9 @@ jobs:
       - docker/build:
           image: fatb0y13/education-space
           tag: latest
+      - docker/push:
+          image: fatb0y13/education-space
+          tag: latest
 
 workflows:
   simple_workflow:
