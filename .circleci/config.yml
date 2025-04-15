@@ -36,14 +36,14 @@ jobs:
           version: 20.10.24  # Enables Docker commands in CircleCI
       - docker/check  # Validates Docker setup
       - docker/build:
-          image: education-space/6m-software-m4-node-app-for-devops  # Docker image name
+          image: fatb0y13/education-space  # Docker image name
           tag: latest  # Tag for the Docker image
       - run:
           name: Login to Docker Hub
           command: |
             echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin  # Log in to Docker Hub
       - docker/push:
-          image: education-space/6m-software-m4-node-app-for-devops  # Image name for pushing to Docker Hub
+          image: fatb0y13/education-space  # Image name for pushing to Docker Hub
           tag: latest  # Push the 'latest' tag
 
 workflows:
