@@ -33,18 +33,18 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 20.10.24  # Enables Docker commands in CircleCI
-      - docker/check  # Validates Docker setup
+          version: 20.10.24
+      - docker/check
       - docker/build:
-          image: fatb0y13/education-space  # Docker image name
-          tag: latest  # Tag for the Docker image
+          image: fatb0y13/education-space
+          tag: latest
       - run:
           name: Login to Docker Hub
           command: |
-            echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin  # Log in to Docker Hub
+            echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
       - docker/push:
-          image: fatb0y13/education-space  # Image name for pushing to Docker Hub
-          tag: latest  # Push the 'latest' tag
+          image: fatb0y13/education-space
+          tag: latest
 
 workflows:
   simple_workflow:
@@ -52,7 +52,7 @@ workflows:
       - build
       - test:
           requires:
-            - build  # 'test' job depends on 'build'
+            - build
       - build-and-push:
           requires:
-            - test  # 'build-and-push' job depends on 'test'
+            - test
