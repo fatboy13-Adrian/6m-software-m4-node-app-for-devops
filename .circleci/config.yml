@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   node: circleci/node@7.1.0
+  docker: circleci/docker@2.1.4
 
 jobs:
   build:
@@ -11,9 +12,9 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - run: |
-          echo "Installing dependencies..."
-          npm install
+      - run:
+          name: Install dependencies
+          command: npm install
 
   test:
     docker:
@@ -22,9 +23,24 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - run: |
-          echo "Running tests..."
-          npm run test
+      - run:
+          name: Run tests
+          command: npm run test
+
+  build-and-push:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.24
+      - docker/check
+      - docker/build:
+          image: education-space/flask-docker-app-for-devops
+          tag: latest
+      - docker/push:
+          image: education-space/flask-docker-app-for-devops
+          tag: latest
 
 workflows:
   simple_workflow:
@@ -33,3 +49,6 @@ workflows:
       - test:
           requires:
             - build
+      - build-and-push:
+          requires:
+            - test
