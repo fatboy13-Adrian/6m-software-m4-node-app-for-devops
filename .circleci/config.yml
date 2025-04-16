@@ -1,8 +1,10 @@
 version: 2.1
+
 orbs:
   node: circleci/node@5.0.1
   docker: circleci/docker@2.1.4
   heroku: circleci/heroku@2.0.0
+
 jobs:
   build:
     docker:
@@ -11,9 +13,12 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - run: |
-          echo Installing dependencies...”
-          npm install
+      - run:
+          name: Install Dependencies
+          command: |
+            echo "Installing dependencies..."
+            npm install
+
   test:
     docker:
       - image: cimg/node:16.10
@@ -21,10 +26,12 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - run: |
-          echo “Running tests...”
-          npm run test
-  
+      - run:
+          name: Run Tests
+          command: |
+            echo "Running tests..."
+            npm run test
+
   publish:
     executor: docker/docker
     steps:
@@ -35,31 +42,54 @@ jobs:
           image: fatb0y13/education-space
       - docker/push:
           image: fatb0y13/education-space
+
   deploy:
     docker:
-        - image: cimg/node:16.10
+      - image: cimg/node:16.10
     steps:
-        - setup_remote_docker      
-        - heroku/install
-        - checkout
-        - run:
-            name: Heroku Container Push
-            command: | 
-                heroku container:login
-                heroku stack:set container -a adrian-su-devops
-                heroku container:push web -a adrian-su-devops
-                heroku container:release web -a adrian-su-devops
+      - setup_remote_docker
+      - heroku/install
+      - checkout
+      - run:
+          name: Heroku Container Push
+          command: |
+            heroku container:login
+            heroku stack:set container -a adrian-su-devops
+            heroku container:push web -a adrian-su-devops
+            heroku container:release web -a adrian-su-devops
 
 workflows:
+  version: 2
   simple_workflow:
     jobs:
-      - build
+      - build:
+          filters:
+            branches:
+              only:
+                - main
+                - release
+
       - test:
           requires:
             - build
+          filters:
+            branches:
+              only:
+                - main
+                - release
+
       - publish:
           requires:
             - test
+          filters:
+            branches:
+              only:
+                - release
+
       - deploy:
           requires:
             - publish
+          filters:
+            branches:
+              only:
+                - release
