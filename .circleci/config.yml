@@ -1,9 +1,8 @@
 version: 2.1
-
 orbs:
-  node: circleci/node@7.1.0
+  node: circleci/node@5.0.1
   docker: circleci/docker@2.1.4
-
+  heroku: circleci/heroku@2.0.0
 jobs:
   build:
     docker:
@@ -12,10 +11,9 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - run:
-          name: Install dependencies
-          command: npm install
-
+      - run: |
+          echo Installing dependencies...”
+          npm install
   test:
     docker:
       - image: cimg/node:16.10
@@ -23,24 +21,34 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - run:
-          name: Run tests
-          command: npm run test
-
-  build-and-push:
-    docker:
-      - image: cimg/base:stable
+      - run: |
+          echo “Running tests...”
+          npm run test
+  
+  publish:
+    executor: docker/docker
     steps:
+      - setup_remote_docker
       - checkout
-      - setup_remote_docker:
-          version: 20.10.24
       - docker/check
       - docker/build:
           image: fatb0y13/education-space
-          tag: latest
       - docker/push:
           image: fatb0y13/education-space
-          tag: latest
+  deploy:
+    docker:
+        - image: cimg/node:16.10
+    steps:
+        - setup_remote_docker      
+        - heroku/install
+        - checkout
+        - run:
+            name: Heroku Container Push
+            command: | 
+                heroku container:login
+                heroku stack:set container -a adrian-su-devops
+                heroku container:push web -a adrian-su-devops
+                heroku container:release web -a adrian-su-devops
 
 workflows:
   simple_workflow:
@@ -49,6 +57,9 @@ workflows:
       - test:
           requires:
             - build
-      - build-and-push:
+      - publish:
           requires:
             - test
+      - deploy:
+          requires:
+            - publish
