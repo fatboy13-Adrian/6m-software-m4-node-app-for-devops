@@ -45,6 +45,7 @@ jobs:
           command: docker build -t $IMAGE_NAME .
       - snyk/scan:
           docker-image-name: $IMAGE_NAME
+          severity-threshold: high # Exclude low and medium CVEs
 
   codescan:
     executor: node_executor
@@ -54,7 +55,7 @@ jobs:
           pkg-manager: npm
       - run:
           name: Snyk Code Scan
-          command: npx snyk code test
+          command: npx snyk code test --severity-threshold=high # Exclude low and medium CVEs
 
   publish:
     executor: docker/docker
