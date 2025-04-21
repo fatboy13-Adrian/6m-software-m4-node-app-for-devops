@@ -37,6 +37,16 @@ jobs:
             - run: docker build -t $IMAGE_NAME .
             - snyk/scan: 
                 docker-image-name: $IMAGE_NAME
+  codescan:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - snyk/install
+      - run: |
+          snyk code test
   publish:
     executor: docker/docker
     steps:
@@ -78,6 +88,12 @@ workflows:
           requires:
             - publish
       - scan:
+          requires:
+            - build
+          filters:
+            branches:
+              only: main
+      - codescan:
           requires:
             - build
           filters:
