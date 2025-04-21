@@ -4,6 +4,7 @@ orbs:
   node: circleci/node@5.0.1
   docker: circleci/docker@2.1.4
   heroku: circleci/heroku@2.0.0
+  snyk: snyk/snyk@1.5.0
 
 executors:
   node_executor:
@@ -30,6 +31,31 @@ jobs:
       - run:
           name: Run tests
           command: npm run test
+
+  scan:
+    executor: node_executor
+    environment:
+      IMAGE_NAME: fatb0y13/6m-software-m4-node-app-for-devops
+    steps:
+      - checkout
+      - setup_remote_docker
+      - docker/check
+      - run:
+          name: Build Docker image
+          command: docker build -t $IMAGE_NAME .
+      - snyk/scan:
+          docker-image-name: $IMAGE_NAME
+          severity-threshold: high # Exclude low and medium CVEs
+
+  codescan:
+    executor: node_executor
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Snyk Code Scan
+          command: npx snyk code test --severity-threshold=high # Exclude low and medium CVEs
 
   publish:
     executor: docker/docker
@@ -71,3 +97,15 @@ workflows:
       - deploy:
           requires:
             - publish
+      - scan:
+          requires:
+            - build
+          filters:
+            branches:
+              only: main
+      - codescan:
+          requires:
+            - build
+          filters:
+            branches:
+              only: main
