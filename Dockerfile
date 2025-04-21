@@ -2,12 +2,15 @@ FROM node:16-alpine
 
 WORKDIR /app
 
+ENV NODE_ENV=production
 ENV PORT=3000
 
-COPY ["package.json", "package-lock.json*", "./"]
+COPY package*.json ./
 
-RUN npm install
+RUN npm install --production
 
 COPY . .
+
+EXPOSE 3000
 
 CMD ["npm", "start"]
