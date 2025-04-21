@@ -10,9 +10,6 @@ executors:
   node_executor:
     docker:
       - image: cimg/node:16.10
-  docker_executor:
-    docker:
-      - image: cimg/node:16.10
 
 jobs:
   build:
@@ -22,7 +19,7 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run:
-          name: Install Dependencies
+          name: Install dependencies
           command: npm install
 
   test:
@@ -32,11 +29,11 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run:
-          name: Run Tests
+          name: Run tests
           command: npm run test
 
   scan:
-    executor: docker_executor
+    executor: node_executor
     environment:
       IMAGE_NAME: fatb0y13/6m-software-m4-node-app-for-devops
     steps:
@@ -44,7 +41,7 @@ jobs:
       - setup_remote_docker
       - docker/check
       - run:
-          name: Build Docker Image
+          name: Build Docker image
           command: docker build -t $IMAGE_NAME .
       - snyk/scan:
           docker-image-name: $IMAGE_NAME
@@ -55,10 +52,9 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - snyk/install
       - run:
-          name: Run Snyk Code Scan
-          command: snyk code test
+          name: Snyk Code Scan
+          command: npx snyk code test
 
   publish:
     executor: docker/docker
@@ -80,7 +76,7 @@ jobs:
       - heroku/install
       - checkout
       - run:
-          name: Deploy to Heroku
+          name: Heroku Container Push
           command: |
             heroku container:login
             heroku stack:set container -a fatb0y13-su-devops
