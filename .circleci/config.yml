@@ -29,7 +29,7 @@ jobs:
         docker:
             - image: cimg/node:16.10
         environment:
-            IMAGE_NAME: edisonzsq/education-space
+            IMAGE_NAME: fatb0y13/6m-software-m4-node-app-for-devops
         steps:
             - checkout
             - setup_remote_docker      
@@ -56,9 +56,9 @@ jobs:
           docker-username: DOCKERHUB_LOGIN  # DOCKER_LOGIN is the default value, if it exists, it automatically would be used.
           docker-password: DOCKERHUB_PASSWORD  # DOCKER_PASSWORD is the default value
       - docker/build:
-          image: wongshennan/test_repository
+          image: fatb0y13/6m-software-m4-node-app-for-devops
       - docker/push:
-          image: wongshennan/test_repository
+          image: fatb0y13/6m-software-m4-node-app-for-devops
   deploy:
     docker:
       - image: cimg/node:16.10
@@ -70,9 +70,9 @@ jobs:
           name: Heroku Container Push
           command: | 
               heroku container:login
-              heroku stack:set container -a shennan-su-devops
-              heroku container:push web -a shennan-su-devops
-              heroku container:release web -a shennan-su-devops
+              heroku stack:set container -a fatb0y13-su-devops
+              heroku container:push web -a fatb0y13-su-devops
+              heroku container:release web -a fatb0y13-su-devops
 
 workflows:
   simple_workflow:
